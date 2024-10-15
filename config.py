@@ -1,6 +1,2 @@
-import shelve
-
-db = shelve.open("pandora")
-for key in db:
-    print(f"{key} {db[key]}")
-db.close()
+API_KEY = "sk-RBr2--KpZX2OncVTDxOmmSqaVqMsS"
+BOT_KEY1 = "7914691283:AAEf7gVCqyonBrUHCo57b9sUEpBxD4eFXWE"
