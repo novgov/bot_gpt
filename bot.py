@@ -70,9 +70,17 @@ async def store(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    message = update.message.text
-    answer = gpt(message)
-    await update.message.reply_text(answer)
+    user = update.effective_user
+    user_id = str(user.id)
+    pandora = shelve.open("pandora")
+    tokens = pandora[user_id]["tokens"]
+    if tokens > 0:
+        message = update.message.text
+        answer = gpt(message)
+        await update.message.reply_text(answer)
+    else:
+        mess = "Пополните баланс токенов в /store"
+        await update.message.reply_text(mess)
 
 
 def main() -> None:
