@@ -3,7 +3,7 @@ import logging
 import shelve
 
 from api import gpt
-
+from enum import Enum
 from telegram import ForceReply, Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 from config import BOT_KEY1
@@ -18,8 +18,11 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
-# Define a few command handlers. These usually take the two arguments update and
-# context.
+class ModelEnum(Enum):
+    gpt_text = 1
+    gpt_image = 2
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
     user = update.effective_user
@@ -30,7 +33,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         user_data = {
             "user_name": user_name,
             "subs": "Free",
-            "tokens": 0
+            "tokens": 0,
+            "model": ModelEnum.gpt_text.value
         }
         pandora[str(user_id)] = user_data
     await update.message.reply_text(f"Добро пожаловать в GPT бота! {pandora[str(user_id)]["user_name"]}")
@@ -74,10 +78,16 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     user_id = str(user.id)
     pandora = shelve.open("pandora")
     tokens = pandora[user_id]["tokens"]
+    gpt_model = pandora[user_id]["model"]
     if tokens > 0:
-        message = update.message.text
-        answer = gpt(message)
-        await update.message.reply_text(answer)
+        if gpt_model == ModelEnum.gpt_text.value:
+            message = update.message.text
+            answer = gpt(message)
+            await update.message.reply_text(answer)
+        if gpt_model == ModelEnum.gpt_image.value:
+            message = update.message.text
+            answer = "НУЖНО РЕАЛИЗОВАТЬ"
+            await update.message.reply_text(answer)
     else:
         mess = "Пополните баланс токенов в /store"
         await update.message.reply_text(mess)
