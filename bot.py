@@ -4,8 +4,8 @@ import shelve
 
 from api import gpt, image
 from enum import Enum
-from telegram import ForceReply, Update
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram import ForceReply, Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackContext, CallbackQueryHandler
 from config import BOT_KEY1
 
 # Enable logging
@@ -33,8 +33,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         user_data = {
             "user_name": user_name,
             "subs": "Free",
-            "tokens": 0,
-            "model": ModelEnum.gpt_text.value
+            "tokens": 1,
+            "model": ModelEnum.gpt_image.value
         }
         pandora[str(user_id)] = user_data
     await update.message.reply_text(f"Добро пожаловать в GPT бота! {pandora[str(user_id)]["user_name"]}")
@@ -72,6 +72,41 @@ async def store(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     pandora[user_id]["tokens"] = 20
     pandora[user_id]["subs"] = "VIP"
 
+async def mode(update: Update, context: CallbackContext):
+    keyboard = [
+        [InlineKeyboardButton("GPT 3.5", callback_data="1")],
+        [InlineKeyboardButton("Stable Diffusion", callback_data="2")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("Тут вы можете сменить модель нейросетей", reply_markup=reply_markup)
+
+
+async def button(update: Update, context: CallbackContext):
+    pandora = shelve.open("pandora")
+    query = update.callback_query
+    await query.answer()
+    mode_gpt = query.data
+    user_id_chat = str(query.from_user.id)
+    pandora[user_id_chat]["model"] = mode_gpt
+    selected_option = query.data
+
+    new_keyboard = [
+        [InlineKeyboardButton("GPT 3.5", callback_data="1")],
+        [InlineKeyboardButton("Stable Diffusion", callback_data="2")]
+    ]
+
+    for row in new_keyboard:
+        for button in row:
+            if button.callback_data == selected_option:
+                new_button = InlineKeyboardButton(f"✅ {button.text}", callback_data=button.callback_data)
+                row[row.index(button)] = new_button
+
+    reply_markup = InlineKeyboardMarkup(new_keyboard)
+    await query.edit_message_text(
+        text="Тут вы можете сменить модель нейросетей",
+        reply_markup=reply_markup
+    )
+
 
 async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
@@ -86,8 +121,11 @@ async def process_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             await update.message.reply_text(answer)
         if gpt_model == ModelEnum.gpt_image.value:
             message = update.message.text
-            answer = "НУЖНО РЕАЛИЗОВАТЬ"
-            await update.message.reply_text(answer)
+            answer = image(message)
+            await update.message.reply_photo(
+                photo=answer[0],
+                caption=answer[1]
+            )
     else:
         mess = "Пополните баланс токенов в /store"
         await update.message.reply_text(mess)
@@ -100,6 +138,8 @@ def main() -> None:
 
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("mode", mode))
+    application.add_handler(CallbackQueryHandler(button))
     application.add_handler(CommandHandler("store", store))
     application.add_handler(CommandHandler("profile", profile))
     application.add_handler(CommandHandler("help", help_command))

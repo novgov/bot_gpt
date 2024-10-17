@@ -9,6 +9,7 @@ def gpt(text):
     response = requests.post(url, json=data, headers=headers)
     return response.json()[0]["content"]
 
+
 def image(text):
     url = "https://api.air.fail/public/image"
     data = {"content": text}

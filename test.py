@@ -9,6 +9,6 @@ import requests
 # return response.json()[0]["content"]
 url = "https://api.air.fail/public/image/stablediffusion"
 headers = {"Authorization": "sk-lyCjtL5n3wUrXav9Ra1LiqcP2uIYG"}
-data = {"content": "Нарисуй чайник"}
+data = {"content": "Нарисуй Егора в машине с куклой"}
 response = requests.post(url, headers=headers, json=data)
 print(response.json())
