@@ -1,4 +1,4 @@
-# import requests
+import requests
 # from config import API_KEY
 #
 #
@@ -7,8 +7,8 @@
 # headers = {"Authorization": API_KEY}
 # response = requests.post(url, json=data, headers=headers)
 # return response.json()[0]["content"]
-from enum import Enum
-
-class Test(Enum):
-    a = 1
-print(dir(Test.a))
+url = "https://api.air.fail/public/image/stablediffusion"
+headers = {"Authorization": "sk-lyCjtL5n3wUrXav9Ra1LiqcP2uIYG"}
+data = {"content": "Нарисуй чайник"}
+response = requests.post(url, headers=headers, json=data)
+print(response.json())

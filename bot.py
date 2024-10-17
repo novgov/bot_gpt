@@ -2,7 +2,7 @@
 import logging
 import shelve
 
-from api import gpt
+from api import gpt, image
 from enum import Enum
 from telegram import ForceReply, Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
