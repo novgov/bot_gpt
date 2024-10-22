@@ -54,6 +54,7 @@ async def profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"Подписка: {subscription_type}\n\n"
         f"Лимиты: {tokens} token"
     )
+    pandora.close()
     await update.message.reply_text(profile_text)
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -71,6 +72,7 @@ async def store(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     pandora = shelve.open("pandora")
     pandora[user_id]["tokens"] = 20
     pandora[user_id]["subs"] = "VIP"
+    pandora.close()
 
 async def mode(update: Update, context: CallbackContext):
     keyboard = [
@@ -84,11 +86,11 @@ async def mode(update: Update, context: CallbackContext):
 async def button(update: Update, context: CallbackContext):
     pandora = shelve.open("pandora")
     query = update.callback_query
-    await query.answer()
     mode_gpt = query.data
     user_id_chat = str(query.from_user.id)
-    pandora[user_id_chat]["model"] = mode_gpt
+    pandora[user_id_chat]["model"] = int(mode_gpt)
     selected_option = query.data
+    pandora.close()
 
     new_keyboard = [
         [InlineKeyboardButton("GPT 3.5", callback_data="1")],

@@ -11,7 +11,7 @@ def gpt(text):
 
 
 def image(text):
-    url = "https://api.air.fail/public/image"
+    url = "https://api.air.fail/public/image/stablediffusion"
     data = {"content": text}
     headers = {"Authorization": API_KEY_IMAGE}
     response = requests.post(url, json=data, headers=headers)
