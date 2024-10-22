@@ -5,7 +5,8 @@ import shelve
 from api import gpt, image
 from enum import Enum
 from telegram import ForceReply, Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackContext, CallbackQueryHandler
+from telegram.ext import (Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackContext,
+                          CallbackQueryHandler)
 from config import BOT_KEY1
 
 # Enable logging
@@ -74,6 +75,7 @@ async def store(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     pandora[user_id]["subs"] = "VIP"
     pandora.close()
 
+
 async def mode(update: Update, context: CallbackContext):
     keyboard = [
         [InlineKeyboardButton("GPT 3.5", callback_data="1")],
@@ -88,8 +90,9 @@ async def button(update: Update, context: CallbackContext):
     query = update.callback_query
     mode_gpt = query.data
     user_id_chat = str(query.from_user.id)
-    pandora[user_id_chat]["model"] = int(mode_gpt)
-    selected_option = query.data
+    user_model = pandora[user_id_chat]
+    user_model["model"] = int(mode_gpt)
+    pandora[user_id_chat] = user_model
     pandora.close()
 
     new_keyboard = [
@@ -99,7 +102,7 @@ async def button(update: Update, context: CallbackContext):
 
     for row in new_keyboard:
         for button in row:
-            if button.callback_data == selected_option:
+            if button.callback_data == mode_gpt:
                 new_button = InlineKeyboardButton(f"✅ {button.text}", callback_data=button.callback_data)
                 row[row.index(button)] = new_button
 
