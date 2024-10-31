@@ -34,7 +34,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         user_data = {
             "user_name": user_name,
             "subs": "Free",
-            "tokens": 1,
+            "tokens": 0,
             "model": ModelEnum.gpt_image.value
         }
         pandora[str(user_id)] = user_data
@@ -69,10 +69,15 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def store(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     user_id = str(user.id)
-    await update.message.reply_text("Добро пожаловать в магазин! Сколько токенов хочешь купить?")
+    await update.message.reply_text("Добро пожаловать в магазин! Ты приобрел 20 токенов")
     pandora = shelve.open("pandora")
-    pandora[user_id]["tokens"] = 20
-    pandora[user_id]["subs"] = "VIP"
+    user_data = {
+        "user_name": user.full_name,
+        "subs": "VIP",
+        "tokens": int(pandora[user_id]["tokens"]) + 20,
+        "model": ModelEnum.gpt_image.value
+    }
+    pandora[user_id] = user_data
     pandora.close()
 
 
